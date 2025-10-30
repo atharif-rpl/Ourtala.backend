@@ -11,32 +11,25 @@ class PermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Reset cache permission
+        // Reset cache dulu
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // --- BUAT PERMISSIONS (PASTIKAN TIDAK DUPLIKAT) ---
-        $permissions = [
-            // Donasi
-            'view donations',
-            'create donations',
-            'edit donations',
-            'delete donations',
+        // --- BUAT PERMISSIONS (IZIN) ---
+        Permission::create(['name' => 'view donations']);
+        Permission::create(['name' => 'create donations']);
+        Permission::create(['name' => 'edit donations']);
+        Permission::create(['name' => 'delete donations']);
+        Permission::create(['name' => 'manage team members']);
+        Permission::create(['name' => 'manage users']);
 
-            // Team members
-            'manage team members',
+        // --- FIX: RESET CACHE LAGI SETELAH MEMBUAT PERMISSIONS ---
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-            // User management
-            'manage users',
-        ];
+        // --- BUAT ROLES (PERAN) ---
 
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
-        }
-
-        // --- BUAT ROLE (PASTIKAN TIDAK DUPLIKAT) ---
         // 1. Role "Editor"
-        $editorRole = Role::firstOrCreate(['name' => 'Editor']);
-        $editorRole->syncPermissions([
+        $editorRole = Role::create(['name' => 'Editor']);
+        $editorRole->givePermissionTo([
             'view donations',
             'create donations',
             'edit donations',
@@ -45,7 +38,7 @@ class PermissionSeeder extends Seeder
         ]);
 
         // 2. Role "Super Admin"
-        $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
-        $superAdminRole->syncPermissions(Permission::all());
+        $superAdminRole = Role::findByName('Super Admin');
+        $superAdminRole->givePermissionTo(Permission::all());
     }
 }
