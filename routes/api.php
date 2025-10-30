@@ -3,9 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController; // <-- 1. Tambahkan ini
 use App\Http\Controllers\DonationController;
-use App\Http\Controllers\Api\TeamMemberController; // (Pastikan path ini benar)
+use App\Http\Controllers\Api\TeamMemberController;
+use App\Http\Controllers\AuthController; // <-- TAMBAHKAN BARIS INI
 
 /*
 |--------------------------------------------------------------------------
