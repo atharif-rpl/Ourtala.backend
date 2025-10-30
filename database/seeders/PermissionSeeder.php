@@ -11,24 +11,27 @@ class PermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Reset cache dulu
+        // Reset cache
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // --- BUAT PERMISSIONS (IZIN) ---
-        Permission::create(['name' => 'view donations']);
-        Permission::create(['name' => 'create donations']);
-        Permission::create(['name' => 'edit donations']);
-        Permission::create(['name' => 'delete donations']);
-        Permission::create(['name' => 'manage team members']);
-        Permission::create(['name' => 'manage users']);
+        $permissions = [
+            'view donations',
+            'create donations',
+            'edit donations',
+            'delete donations',
+            'manage team members',
+            'manage users',
+        ];
 
-        // --- FIX: RESET CACHE LAGI SETELAH MEMBUAT PERMISSIONS ---
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        foreach ($permissions as $perm) {
+            Permission::firstOrCreate(['name' => $perm]);
+        }
 
         // --- BUAT ROLES (PERAN) ---
 
         // 1. Role "Editor"
-        $editorRole = Role::create(['name' => 'Editor']);
+        $editorRole = Role::firstOrCreate(['name' => 'Editor']);
         $editorRole->givePermissionTo([
             'view donations',
             'create donations',
@@ -38,7 +41,7 @@ class PermissionSeeder extends Seeder
         ]);
 
         // 2. Role "Super Admin"
-        $superAdminRole = Role::findByName('Super Admin');
+        $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
         $superAdminRole->givePermissionTo(Permission::all());
     }
 }
