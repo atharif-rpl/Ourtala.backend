@@ -45,10 +45,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'me']);
 
-    // 2. PINDAHKAN RUTE DONASI & TIM KE DALAM GRUP INI
+    // 2. RUTE DONASI & TIM SEKARANG ADA DI DALAM GRUP INI
     Route::apiResource('donations', DonationController::class);
     Route::apiResource('team-members', TeamMemberController::class);
 
-    // (Route::post('/donations', ...) sudah tidak perlu karena ada di apiResource)
+    // (Route::post('/donations', ...) yang duplikat sudah dihapus)
 
 });
+
