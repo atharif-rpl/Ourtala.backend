@@ -27,7 +27,7 @@ class SuperAdminSeeder extends Seeder
         $user = User::create([
             'name' => 'Atharif (Master Admin)',
             'email' => 'admin@ourtala.id', // Ganti dengan email Anda
-            'password' => bcrypt('passwordSuperRahasiaAnda') // Ganti password ini
+            'password' => bcrypt('Ourtala123') // Ganti password ini
         ]);
 
         // Tetapkan role "Super Admin" ke user Anda

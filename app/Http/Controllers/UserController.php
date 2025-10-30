@@ -6,35 +6,33 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
-
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    // Method untuk mengambil semua user
+    /**
+     * Tampilkan semua user beserta role-nya
+     */
     public function index()
     {
-        // Hanya user dengan izin 'manage users' yang bisa mengakses ini
-        if (!auth()->user()->can('manage users')) {
-            abort(403, 'Anda tidak punya izin.');
-        }
+        $this->authorizeAccess();
 
-        // Ambil semua user beserta role mereka
         $users = User::with('roles')->get();
         return response()->json($users);
     }
 
-    // Method untuk membuat user baru
+    /**
+     * Simpan user baru dan tetapkan role
+     */
     public function store(Request $request)
     {
-        if (!auth()->user()->can('manage users')) {
-            abort(403, 'Anda tidak punya izin.');
-        }
+        $this->authorizeAccess();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|string|exists:roles,name', // Pastikan role-nya ada
+            'role' => 'required|string|exists:roles,name',
         ]);
 
         $user = User::create([
@@ -43,53 +41,70 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        // Tetapkan role-nya
         $user->assignRole($validated['role']);
 
-        return response()->json($user, 201);
+        return response()->json([
+            'message' => 'User berhasil dibuat.',
+            'user' => $user->load('roles')
+        ], 201);
     }
 
-    // Method untuk meng-update role user
+    /**
+     * Update role user
+     */
     public function updateRole(Request $request, User $user)
     {
-        if (!auth()->user()->can('manage users')) {
-            abort(403, 'Anda tidak punya izin.');
-        }
+        $this->authorizeAccess();
 
         $validated = $request->validate([
             'role' => 'required|string|exists:roles,name',
         ]);
 
-        // 'syncRoles' akan menghapus role lama dan menambah role baru
         $user->syncRoles([$validated['role']]);
 
-        return response()->json($user->load('roles'));
+        return response()->json([
+            'message' => 'Role user berhasil diperbarui.',
+            'user' => $user->load('roles')
+        ]);
     }
 
-    // Method untuk menghapus user
+    /**
+     * Hapus user (tidak boleh hapus dirinya sendiri)
+     */
     public function destroy(User $user)
     {
-        if (!auth()->user()->can('manage users')) {
-            abort(403, 'Anda tidak punya izin.');
+        $this->authorizeAccess();
+
+        if (Auth::id() === $user->id) {
+            return response()->json([
+                'message' => 'Anda tidak bisa menghapus akun Anda sendiri.'
+            ], 400);
         }
 
-        // Jangan biarkan user menghapus dirinya sendiri
-        if (auth()->id() === $user->id) {
-            return response()->json(['message' => 'Anda tidak bisa menghapus akun Anda sendiri.'], 400);
-        }
 
         $user->delete();
-        return response()->json(['message' => 'User berhasil dihapus'], 200);
+
+        return response()->json(['message' => 'User berhasil dihapus.'], 200);
     }
 
-    // Method untuk mengambil daftar semua role
+    /**
+     * Ambil daftar semua role
+     */
     public function getRoles()
     {
-         if (!auth()->user()->can('manage users')) {
+        $this->authorizeAccess();
+
+        $roles = Role::pluck('name');
+        return response()->json($roles);
+    }
+
+    /**
+     * Cek apakah user punya izin 'manage users'
+     */
+    private function authorizeAccess()
+    {
+        if (!Auth::check() || !Auth::user()->can('manage users')) {
             abort(403, 'Anda tidak punya izin.');
         }
-
-        $roles = Role::all()->pluck('name');
-        return response()->json($roles);
     }
 }
