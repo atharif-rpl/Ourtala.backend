@@ -5,32 +5,28 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\PermissionRegistrar; // <-- 1. TAMBAHKAN IMPORT INI
 
 class SuperAdminSeeder extends Seeder
 {
     public function run(): void
     {
-        // 2. RESET CACHE DULU
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        // Buat role Super Admin (jika belum ada)
+        $role = Role::firstOrCreate(['name' => 'Super Admin']);
 
-        // Buat role "Super Admin"
-        $role = Role::create(['name' => 'Super Admin']);
+        // Beri semua permission ke Super Admin
+        $permissions = Permission::pluck('name')->toArray();
+        $role->syncPermissions($permissions);
 
-        // Buat permission wildcard
-        Permission::create(['name' => '*']);
+        // Buat user super admin (kalau belum ada)
+        $user = User::firstOrCreate(
+            ['email' => 'superadmin@example.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => bcrypt('password'),
+            ]
+        );
 
-        // Beri role ini semua izin
-        $role->givePermissionTo('*');
-
-        // Buat akun master Anda
-        $user = User::create([
-            'name' => 'Atharif (Master Admin)',
-            'email' => 'admin@ourtala.id', // Ganti dengan email Anda
-            'password' => bcrypt('Ourtala123') // Ganti password ini
-        ]);
-
-        // Tetapkan role "Super Admin" ke user Anda
+        // Beri role Super Admin
         $user->assignRole($role);
     }
 }
