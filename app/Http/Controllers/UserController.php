@@ -84,7 +84,7 @@ class UserController extends Controller
     // Method untuk mengambil daftar semua role
     public function getRoles()
     {
-        if (!auth()->user()->can('manage users')) {
+         if (!auth()->user()->can('manage users')) {
             abort(403, 'Anda tidak punya izin.');
         }
 
