@@ -17,10 +17,10 @@ class DatabaseSeeder extends Seeder
     {
         // Panggil Seeder untuk membuat Akun Super Admin,
         // lalu panggil Seeder untuk membuat Roles & Permissions
+        // INI ADALAH URUTAN YANG BENAR:
         $this->call([
             SuperAdminSeeder::class,
             PermissionSeeder::class,
-            // Jangan panggil factory di sini
         ]);
 
         // Buat 10 user bohongan untuk tes (opsional)

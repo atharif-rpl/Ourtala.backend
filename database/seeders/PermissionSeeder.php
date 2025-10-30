@@ -11,28 +11,32 @@ class PermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Reset cache dulu
+        // Reset cache permission
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // --- BUAT PERMISSIONS (IZIN) ---
-        // Izin untuk Donasi
-        Permission::create(['name' => 'view donations']);
-        Permission::create(['name' => 'create donations']);
-        Permission::create(['name' => 'edit donations']);
-        Permission::create(['name' => 'delete donations']);
+        // --- BUAT PERMISSIONS (PASTIKAN TIDAK DUPLIKAT) ---
+        $permissions = [
+            // Donasi
+            'view donations',
+            'create donations',
+            'edit donations',
+            'delete donations',
 
-        // Izin untuk Team Members
-        Permission::create(['name' => 'manage team members']);
+            // Team members
+            'manage team members',
 
-        // Izin untuk Users (Hanya Super Admin)
-        Permission::create(['name' => 'manage users']);
+            // User management
+            'manage users',
+        ];
 
-        // --- BUAT ROLES (PERAN) ---
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
 
+        // --- BUAT ROLE (PASTIKAN TIDAK DUPLIKAT) ---
         // 1. Role "Editor"
-        // (Editor bisa mengurus donasi, tapi tidak bisa mengurus user)
-        $editorRole = Role::create(['name' => 'Editor']);
-        $editorRole->givePermissionTo([
+        $editorRole = Role::firstOrCreate(['name' => 'Editor']);
+        $editorRole->syncPermissions([
             'view donations',
             'create donations',
             'edit donations',
@@ -41,9 +45,7 @@ class PermissionSeeder extends Seeder
         ]);
 
         // 2. Role "Super Admin"
-        // (Ambil role Super Admin yang sudah ada)
-        $superAdminRole = Role::findByName('Super Admin');
-        // Beri semua izin yang baru dibuat (termasuk 'manage users')
-        $superAdminRole->givePermissionTo(Permission::all());
+        $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
+        $superAdminRole->syncPermissions(Permission::all());
     }
 }
