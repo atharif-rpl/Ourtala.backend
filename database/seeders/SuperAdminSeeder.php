@@ -41,7 +41,7 @@ class SuperAdminSeeder extends Seeder
             ['email' => 'admin@ourtala.id'],
             [
                 'name' => 'Atharif (Master Admin)',
-                'password' => Hash::make('Ourtala123'),
+                'password' => Hash::make('ourtala123'),
             ]
         );
 
