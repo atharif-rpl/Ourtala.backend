@@ -1,32 +1,12 @@
 <?php
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Cross-Origin Resource Sharing (CORS) Configuration
-    |--------------------------------------------------------------------------
-    */
-
-    'paths' => [
-        'api/*',
-        'login',
-        'logout',
-        'sanctum/csrf-cookie',
-    ],
-
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout'],
     'allowed_methods' => ['*'],
-
-    'allowed_origins' => [
-        'https://ourtala-frontend.vercel.app',
-    ],
-
+    'allowed_origins' => ['https://ourtala-frontend.vercel.app'],
     'allowed_origins_patterns' => [],
-
     'allowed_headers' => ['*'],
-
-    'exposed_headers' => false,
-
+    'exposed_headers' => [],
     'max_age' => 0,
-
     'supports_credentials' => true,
 ];
