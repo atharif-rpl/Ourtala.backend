@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\Api\TeamMemberController;
-use App\Http\Controllers\AuthController; // <-- 1. Import AuthController
+use App\Http\Controllers\Api\AuthController; // <-- 1. Import AuthController
 
 /*
 |--------------------------------------------------------------------------
