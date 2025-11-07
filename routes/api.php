@@ -1,55 +1,26 @@
 <?php
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\Api\TeamMemberController;
-use App\Http\Controllers\Api\AuthController; // <-- 1. Import AuthController
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-*/
+use App\Http\Controllers\Api\AuthController;
 
 // --- RUTE PUBLIK ---
-// Rute-rute ini bisa diakses siapa saja tanpa login
-
-// Rute untuk login
 Route::post('/login', [AuthController::class, 'login']);
 
-// Rute tes Anda
 Route::get('/test', function () {
     return response()->json([
-        'message' => 'Hello from Laravel backend!',
-        'status' => 'success'
+        'message' => 'API is working!',
+        'timestamp' => now(),
     ]);
 });
 
-Route::post('/test-post', function (Request $request) {
-    Log::info('Test POST route hit successfully.');
-    return response()->json([
-        'message' => 'Test POST route is working!',
-        'data_received' => $request->all()
-    ]);
-});
-
-
-// --- RUTE TERLINDUNGI (WAJIB LOGIN) ---
-// Semua rute di dalam grup ini WAJIB menggunakan token Sanctum
-
+// --- RUTE TERLINDUNGI ---
 Route::middleware('auth:sanctum')->group(function () {
-
-    // Rute untuk cek user & logout
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/user', [AuthController::class, 'me']);
+    Route::get('/user', [AuthController::class, 'user']);
 
-    // 2. RUTE DONASI & TIM SEKARANG ADA DI DALAM GRUP INI
     Route::apiResource('donations', DonationController::class);
     Route::apiResource('team-members', TeamMemberController::class);
-
-    // (Route::post('/donations', ...) yang duplikat sudah dihapus)
-
 });
-

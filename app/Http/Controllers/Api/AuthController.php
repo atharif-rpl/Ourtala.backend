@@ -5,72 +5,89 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User; // Diperlukan untuk type-hinting dan instance yang dikembalikan Auth
+use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class AuthController extends Controller
 {
-    /**
-     * Menangani permintaan login API.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function login(Request $request)
     {
-        // 1. Validasi input
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
+        try {
+            // Log request untuk debugging
+            Log::info('Login attempt', [
+                'email' => $request->email,
+                'origin' => $request->header('Origin'),
+            ]);
 
-        // 2. Coba lakukan autentikasi
-        if (Auth::attempt($credentials)) {
-            // 3. Jika berhasil, ambil user dan buat token
-            // Auth::user() mengembalikan instance App\Models\User
+            // Validasi input
+            $credentials = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|string',
+            ]);
+
+            // Coba autentikasi
+            if (!Auth::attempt($credentials)) {
+                Log::warning('Login failed: Invalid credentials', ['email' => $request->email]);
+
+                return response()->json([
+                    'message' => 'Email atau password salah.'
+                ], 401);
+            }
+
+            // Ambil user
             $user = Auth::user();
+
+            // Buat token
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            // 4. Kirim kembali data user dan token
+            Log::info('Login successful', ['user_id' => $user->id]);
+
             return response()->json([
                 'message' => 'Login berhasil',
                 'access_token' => $token,
                 'token_type' => 'Bearer',
                 'user' => $user
             ], 200);
-        }
 
-        // 5. Jika gagal, kirim pesan error
-        return response()->json([
-            'message' => 'Email atau password salah.'
-        ], 401);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation error', ['errors' => $e->errors()]);
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            Log::error('Login error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat login',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
-    /**
-     * Menangani permintaan logout API.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function logout(Request $request)
     {
-        // $request->user() juga mengembalikan instance App\Models\User
-        $request->user()->currentAccessToken()->delete();
+        try {
+            $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Logout berhasil'
-        ], 200);
+            return response()->json([
+                'message' => 'Logout berhasil'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Logout error', ['message' => $e->getMessage()]);
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat logout'
+            ], 500);
+        }
     }
 
-    /**
-     * Mendapatkan data user yang sedang login.
-     *
-     * @param Request $request
-     * @return \App\Models\User
-     */
     public function user(Request $request)
     {
-        // Mengembalikan data user yang sudah terotentikasi
-        // $request->user() mengembalikan instance App\Models\User
-        return $request->user();
+        return response()->json($request->user());
     }
 }
