@@ -4,7 +4,11 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "postinstall": "patch-package"
+    },
+    "dependencies": {
+        "patch-package": "^8.0.0"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
